@@ -27,8 +27,8 @@ jobs:
         shell: pwsh
         env:
           FABRIC_TENANT_ID: ${{ secrets.FABRIC_TENANT_ID }}
-          FABRIC_SERVICE_PRINCIPAL_ID: ${{ secrets.FABRIC_SERVICE_PRINCIPAL_ID }}
-          FABRIC_SERVICE_PRINCIPAL_SECRET: ${{ secrets.FABRIC_SERVICE_PRINCIPAL_SECRET }}
+          FABRIC_CLIENT_ID: ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
         run: |
           $scripts = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
           $fabTest = Join-Path $scripts "fab-test.exe"
