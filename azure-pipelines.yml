@@ -33,9 +33,9 @@ steps:
     exit $LASTEXITCODE
   displayName: Run report check
   env:
-    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
-    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
-    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+  FABRIC_TENANT_ID: ${{ secrets.FABRIC_TENANT_ID }}
+  FABRIC_SERVICE_PRINCIPAL_ID: ${{ secrets.FABRIC_SERVICE_PRINCIPAL_ID }}
+  FABRIC_SERVICE_PRINCIPAL_SECRET: ${{ secrets.FABRIC_SERVICE_PRINCIPAL_SECRET }}
 
 - task: PublishPipelineArtifact@1
   condition: always()
