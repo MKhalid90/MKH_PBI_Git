@@ -1,0 +1,44 @@
+trigger: none
+
+schedules:
+- cron: "0 8 * * *"
+  displayName: Daily Fabric report check
+  branches:
+    include:
+    - main
+  always: true
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- group: fab-test-secrets
+
+steps:
+- checkout: self
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: "3.14"
+
+- pwsh: |
+    python -m pip install --pre "cft-fab-test[playwright]"
+    python -m playwright install chromium
+  displayName: Install fab-test
+
+- pwsh: |
+    $scripts = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+    $fabTest = Join-Path $scripts "fab-test.exe"
+    & $fabTest playwright --workspace "Fabric Sandbox" --artifact "Länderperformance"
+    exit $LASTEXITCODE
+  displayName: Run report check
+  env:
+    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+- task: PublishPipelineArtifact@1
+  condition: always()
+  inputs:
+    targetPath: fab-test-results/playwright/Länderperformance
+    artifact: fab-test-results
