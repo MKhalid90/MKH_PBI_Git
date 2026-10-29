@@ -1,0 +1,44 @@
+name: Daily Fabric report check
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # Every day at 08:00 UTC
+  workflow_dispatch: # Run manually from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install fab-test and Playwright
+        run: |
+          python -m pip install --pre "cft-fab-test[playwright]"
+          python -m playwright install chromium
+
+      - name: Run report check
+        shell: pwsh
+        env:
+          FABRIC_TENANT_ID: ${{ secrets.FABRIC_TENANT_ID }}
+          FABRIC_CLIENT_ID: ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
+        run: |
+          $scripts = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+          $fabTest = Join-Path $scripts "fab-test.exe"
+          & $fabTest playwright --workspace "Fabric Sandbox" --artifact "Länderperformance"
+          exit $LASTEXITCODE
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fab-test-results
+          path: fab-test-results/playwright/Länderperformance/
+          if-no-files-found: warn
